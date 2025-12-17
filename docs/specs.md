@@ -28,14 +28,14 @@ These requirements define the behaviours and features of the application.
 These requirements define the constraints for the application.
 
 ### 2.1. Frontend/Usability
-- The frontend will be written in React and Tailwind
+- The frontend will be written in React and Tailwind.
 - Ensure a clean and easy to use user interface.
 
 ### 2.2. Backend
 - The backend will be written in Go to ensure high performance.
 
 ### 2.3. Storage Infrastructure
-- All media will be stored in AWS S3, while metadata references must be stored in a relational database (SQL).
+- All media will be stored in a relational database (MySQL).
 
 ### 2.4. Performance
 - The system will utilize Redis for caching to ensure low latency and fast retrieval.
