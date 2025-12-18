@@ -25,7 +25,7 @@ create table Albums (
 create table Media (
     media_id int unsigned auto_increment primary key,
     user_id int unsigned not null,
-    storage_path varchar(255) not null,
+    object_key varchar(255) not null,
     media_type enum('photo', 'video') not null,
     created_at timestamp not null default current_timestamp,
 

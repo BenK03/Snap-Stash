@@ -35,7 +35,8 @@ These requirements define the constraints for the application.
 - The backend will be written in Go to ensure high performance.
 
 ### 2.3. Storage Infrastructure
-- All media will be stored locally and the file path will be stored in MySQL.
+- Media files are stored in S3-compatible object storage (MinIO for local development and demos).
+- The relational database (MySQL) stores metadata.
 
 ### 2.4. Performance
 - The system will utilize Redis for caching to ensure low latency and fast retrieval.
