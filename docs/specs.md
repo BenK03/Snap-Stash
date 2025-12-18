@@ -4,7 +4,7 @@
 These requirements define the behaviours and features of the application.
 
 ### 1.1. User Authentication
-- Implement OAuth to handle user account creation and email verification.
+- Implement account creation & login.
 
 ### 1.2. Photo/Video Upload
 - Allow users to upload photos and videos to the system storage.
