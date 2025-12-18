@@ -41,8 +41,11 @@ These requirements define the constraints for the application.
 - The system will utilize Redis for caching to ensure low latency and fast retrieval.
 
 ### 2.5. Maintainability
-- The codebase should aim for high cohesion and low coupling, to ensure future updates are easy to manage.
+- The codebase should aim for high cohesion and low coupling to ensure future updates are easy to manage.
 
 ### 2.6. Security
 - Access control must be enforced for privacy storage feature and through OAuth for account verification.
+
+### 2.7. Deployment & Environment
+- Application must be fully containerized via Docker to ensure the system can run locally on all machines.
 
