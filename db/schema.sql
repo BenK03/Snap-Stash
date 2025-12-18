@@ -4,6 +4,7 @@ create table Users (
     user_id int unsigned auto_increment primary key,
     username varchar(50) not null unique,
     password_hash varchar(255) not null,
+    vault_pin_hash varchar(255) null, -- optional
     created_at timestamp not null default current_timestamp
 );
 
