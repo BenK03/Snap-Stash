@@ -2,7 +2,7 @@
 
 create table Users (
     user_id int unsigned auto_increment primary key,
-    username varchar(10) not null unique,
+    username varchar(50) not null unique,
     password_hash varchar(255) not null,
     created_at timestamp not null default current_timestamp
 );
@@ -10,13 +10,13 @@ create table Users (
 create table Albums (
     album_id int unsigned auto_increment primary key,
     user_id int unsigned not null, -- defines the column in the table Albums only
-    title varchar(10) not null,
+    title varchar(100) not null,
     created_at timestamp not null default current_timestamp,
 
     constraint fk_albums_user
-        foreign key (user_id) references User(user_id) -- the user_id in Albums must match a user_id in Users
+        foreign key (user_id) references Users(user_id) -- the user_id in Albums must match a user_id in Users
         on delete cascade -- if a user is deleted, their albums are deleted too
-        on update cascade -- if a user_id changes, update it in Albums too (which probably won't happen)
+        on update cascade, -- if a user_id changes, update it in Albums too (which probably won't happen)
 
     index idx_albums_user_created (user_id, created_at) -- pre-organize to make searching faster
 );
@@ -45,7 +45,7 @@ create table Vault (
     constraint fk_vault_user
         foreign key (user_id) references Users(user_id)
         on delete cascade
-        on update cascade
+        on update cascade,
     constraint fk_vault_media
         foreign key (media_id) references Media(media_id)
         on delete cascade
@@ -55,7 +55,7 @@ create table Vault (
     index idx_vault_user_created (user_id, created_at)
 );
 
-create table Album_Items (
+create table AlbumItems (
     album_id int unsigned not null,
     media_id int unsigned not null,
     created_at timestamp not null default current_timestamp,
@@ -70,7 +70,7 @@ create table Album_Items (
         on delete cascade
         on update cascade,
     
-    INDEX idx_albumitems_media (media_id)
+    index idx_albumitems_media (media_id)
 );
 
 
