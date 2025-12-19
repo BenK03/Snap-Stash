@@ -1,15 +1,18 @@
 package main
 
 import (
-	"net/http"
 	"github.com/gin-gonic/gin"
+	"snapstash/internal/auth"
 )
-func pingHandler(context *gin.Context) {
-	context.JSON(http.StatusOK, gin.H{"message": "pong"})
-}
 
 func main() {
 	router := gin.Default()
-	router.GET("/ping", pingHandler)
+
+	api := router.Group("/api")
+    authGroup := api.Group("/auth")
+
+	authHandler := &auth.Handler{}
+	auth.RegisterRoutes(authGroup, authHandler)
+
 	router.Run("localhost:8080")
 }
