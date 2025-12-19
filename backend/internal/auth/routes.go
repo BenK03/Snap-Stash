@@ -1,7 +1,9 @@
 package auth
 
-import "github.com/gin-gonic/gin"
-
+import (
+	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
+)
 
 // check if username and password are valid then store them in the DB
 func postRegister(c *gin.Context) {
@@ -19,6 +21,14 @@ func postRegister(c *gin.Context) {
 		c.JSON(400, gin.H{"error": "Username and password required"})
 		return
 	}
+
+	// if all is good, hash password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Failed to hash password"})
+		return
+	}
+
 
 
 }
