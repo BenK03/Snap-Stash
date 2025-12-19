@@ -13,7 +13,8 @@ func main() {
 	api := router.Group("/api")
     authGroup := api.Group("/auth")
 
-	db, _ := sql.Open("mysql", "user:password@tcp(localhost:3306)/snapstash")
+	db, _ := sql.Open("mysql", "root:rootpassword@tcp(localhost:3306)/snapstash")
+
 	authHandler := &auth.Handler{DB: db}
 	auth.RegisterRoutes(authGroup, authHandler)
 

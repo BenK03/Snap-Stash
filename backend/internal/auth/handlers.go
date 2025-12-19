@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"database/sql"
+	"fmt"
 )
 
 type Handler struct{
@@ -62,4 +63,23 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 
+	// DB look up for username and password
+	var storedHash string
+	err := h.DB.QueryRow("SELECT password_hash FROM Users WHERE username = ?", req.Username).Scan(&storedHash)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			c.JSON(401, gin.H{"error": "invalid credentials"})
+			return
+		}
+		fmt.Println("LOGIN DB ERROR:", err)
+		c.JSON(500, gin.H{"error": "db error"})
+		return
+	}
+
+	if bcrypt.CompareHashAndPassword([]byte(storedHash), []byte(req.Password)) != nil {
+		c.JSON(401, gin.H{"error": "invalid credentials"})
+		return
+	}
+
+	c.JSON(200, gin.H{"username": req.Username})
 }
