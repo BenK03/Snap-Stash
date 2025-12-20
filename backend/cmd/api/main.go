@@ -36,7 +36,7 @@ func main() {
 	// configure router
 	router := gin.Default()
 
-	// routing
+	// auth routing
 	authGroup := router.Group("/api/auth")
 	authGroup.POST("/register", func(c *gin.Context) {
 		auth.PostRegister(c, db)
@@ -45,6 +45,14 @@ func main() {
 	authGroup.POST("/login", func(c *gin.Context) {
 		auth.PostLogin(c, db)
 	})
+
+	// media upload routing
+	mediaGroup := router.Group("/api/media")
+	mediaGroup.POST("/upload", func(c *gin.Context) {
+		// TODO: implement upload
+		c.JSON(501, gin.H{"error": "not implemented"})
+	})
+
 
 	// run router
 	router.Run(":8080") // Gin is running and listening on this port
