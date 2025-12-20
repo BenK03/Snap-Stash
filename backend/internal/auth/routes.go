@@ -31,6 +31,18 @@ func postRegister(c *gin.Context, db *sql.DB) {
 		return
 	}
 
+	// now store username and password in DB
+	_, err = db.Exec(
+		"insert into Users (username, password_hash) values (?, ?)",
+		req.Username,
+		string(hashedPassword),
+	)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "db insert failed"})
+		return
+	}
+	c.JSON(201, gin.H{"status": "ok"})
+
 
 
 
