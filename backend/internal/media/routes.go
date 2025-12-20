@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"context"
+	"time"
 	"github.com/gin-gonic/gin"
 	minio "github.com/minio/minio-go/v7"
 )
@@ -57,8 +58,9 @@ func PostUpload(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 
 	// create minio path where file will be stored
 	objectKey := fmt.Sprintf(
-		"users/%d/%s",
+		"users/%d/%d_%s",
 		userID,
+		time.Now().UnixNano(),
 		fh.Filename,
 	)
 
@@ -87,7 +89,7 @@ func PostUpload(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 
 	// insert media data into media table.
 	res, err := db.Exec(
-		"INSERT INTO Media (user_id, object_key, media_type) VALUES (?, ?, ?)",
+		"INSERT INTO Media (user_id, storage_path, media_type) VALUES (?, ?, ?)",
 		userID,
 		objectKey,
 		mediaType,
