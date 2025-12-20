@@ -78,9 +78,13 @@ func postLogin(c *gin.Context, db *sql.DB) {
 		return
 	}
 
+	// compare stored password_hash with the password given
+	if err := bcrypt.CompareHashAndPassword([]byte(storedHash), []byte(req.Password)); err != nil {
+		c.JSON(401, gin.H{"error": "invalid credentials"})
+		return
+	}
 
-
-
+	c.JSON(200, gin.H{"status": "ok"}) // send to frontend to proceed
 
 }
 
