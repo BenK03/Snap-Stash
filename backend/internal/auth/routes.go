@@ -60,12 +60,15 @@ func PostLogin(c *gin.Context, db *sql.DB) {
 		return
 	}
 
-	// if all is good find username and corresponding password hash from DB
+	// find username and password in DB and store it in variables
+	var userID int
 	var storedHash string
+
 	err := db.QueryRow(
-		"select password_hash from Users where username = ?",
+		"SELECT user_id, password_hash FROM Users WHERE username = ?",
 		req.Username,
-	).Scan(&storedHash)
+	).Scan(&userID, &storedHash)
+
 
 	// handle user not found
 	if err != nil {
@@ -84,7 +87,14 @@ func PostLogin(c *gin.Context, db *sql.DB) {
 		return
 	}
 
-	c.JSON(200, gin.H{"status": "ok"}) // send to frontend to proceed
+	// send to frontend
+	c.JSON(200, struct {
+		UserID   int    `json:"user_id"`
+		Username string `json:"username"`
+	}{
+		UserID:   userID,
+		Username: req.Username,
+	})
 
 }
 

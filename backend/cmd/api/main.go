@@ -18,6 +18,7 @@ func main() {
 	// configure router
 	router := gin.Default()
 
+	// routing
 	authGroup := router.Group("/api/auth")
 	authGroup.POST("/register", func(c *gin.Context) {
 		auth.PostRegister(c, db)
