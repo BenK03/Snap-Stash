@@ -7,7 +7,7 @@ import (
 )
 
 // check if username and password are valid then store them in the DB
-func postRegister(c *gin.Context, db *sql.DB) {
+func PostRegister(c *gin.Context, db *sql.DB) {
 	var req RegisterReq
 
 	// extract JSON body and put it into req variable
@@ -47,7 +47,7 @@ func postRegister(c *gin.Context, db *sql.DB) {
 
 
 // check if login credentials are in DB
-func postLogin(c *gin.Context, db *sql.DB) {
+func PostLogin(c *gin.Context, db *sql.DB) {
 	var req LoginReq
 
 	if err := c.ShouldBindJSON(&req); err != nil {

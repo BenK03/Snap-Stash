@@ -1,6 +1,7 @@
 package main
 
 import (
+	"snapstash/internal/auth"
 	"database/sql"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
@@ -17,6 +18,15 @@ func main() {
 	// configure router
 	router := gin.Default()
 
+	authGroup := router.Group("/api/auth")
+	authGroup.POST("/register", func(c *gin.Context) {
+		auth.PostRegister(c, db)
+	})
+
+	authGroup.POST("/login", func(c *gin.Context) {
+		auth.PostLogin(c, db)
+	})
+
 	// run router
-	router.Run("localhost:8080")
+	router.Run("localhost:8080") // Gin is running and listening on this port
 }
