@@ -1,13 +1,14 @@
 package media
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	snapminio "snapstash/internal/storage/minio"
 	"strconv"
 	"strings"
-	"context"
 	"time"
+
 	"github.com/gin-gonic/gin"
 	minio "github.com/minio/minio-go/v7"
 )
@@ -89,7 +90,7 @@ func PostUpload(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 
 	// insert media data into media table.
 	res, err := db.Exec(
-		"INSERT INTO Media (user_id, storage_path, media_type) VALUES (?, ?, ?)",
+		"INSERT INTO Media (user_id, object_key, media_type) VALUES (?, ?, ?)",
 		userID,
 		objectKey,
 		mediaType,
@@ -105,7 +106,6 @@ func PostUpload(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 		c.JSON(500, gin.H{"error": "failed to read inserted media id"})
 		return
 	}
-
 
 	c.JSON(201, gin.H{
 		"message":    "uploaded",
