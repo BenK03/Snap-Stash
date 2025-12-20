@@ -3,16 +3,18 @@ package auth
 import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
+	"database/sql"
 )
 
 // check if username and password are valid then store them in the DB
-func postRegister(c *gin.Context) {
+func postRegister(c *gin.Context, db *sql.DB) {
 	var req RegisterReq
 
 	// extract JSON body and put it into req variable
 	// if there are no errors then bind c to req.
 	// if there are errors, return
 	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error": "invalid json"})
 		return
 	}
 
@@ -31,11 +33,12 @@ func postRegister(c *gin.Context) {
 
 
 
+
 }
 
 
 // check if login credentials are in DB
-func postLogin(c *gin.Context) {
+func postLogin(c *gin.Context, db *sql.DB) {
 	// TODO
 }
 
