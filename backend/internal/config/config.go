@@ -18,3 +18,24 @@ type MinIOConfig struct {
 type Config struct {
 	MinIO MinIOConfig
 }
+
+func getEnvString(key string, defaultVal string) string {
+	val := strings.TrimSpace(os.Getenv(key))
+	if val == "" {
+		return defaultVal
+	}
+	return val
+}
+
+func getEnvBool(key string, defaultVal bool) bool {
+	raw := strings.TrimSpace(os.Getenv(key))
+	if raw == "" {
+		return defaultVal
+	}
+
+	parsed, err := strconv.ParseBool(raw)
+	if err != nil {
+		return defaultVal
+	}
+	return parsed
+}
