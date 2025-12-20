@@ -9,9 +9,10 @@ import (
 )
 
 type Client struct {
-	mc     *minio.Client
-	bucket string
+	MC     *minio.Client
+	Bucket string
 }
+
 
 // build minio sdk, check if bucket exists, if not create one (for easy demo)
 func NewClient(cfg config.MinIOConfig) (*Client, error) {
@@ -37,7 +38,7 @@ func NewClient(cfg config.MinIOConfig) (*Client, error) {
 	}
 
 	return &Client{
-		mc:     mc,
-		bucket: cfg.Bucket,
+		MC:     mc,
+		Bucket: cfg.Bucket,
 	}, nil
 }
