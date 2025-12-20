@@ -11,9 +11,8 @@ import (
 	minio "github.com/minio/minio-go/v7"
 )
 
+// Pipeline HTTP → Gin → Validation → MinIO → MySQL → JSON response
 func PostUpload(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
-	_ = db
-	_ = minioClient
 
 	// get user id/check if it is valid
 	userIDRaw := strings.TrimSpace(c.GetHeader("X-User-ID"))
@@ -79,12 +78,41 @@ func PostUpload(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 		return
 	}
 
+	// translate data in to queryable fields for the DB
+	// determine media type
+	mediaType := "photo"
+	if strings.HasPrefix(mimeType, "video/") {
+		mediaType = "video"
+	}
+
+	// insert media data into media table.
+	res, err := db.Exec(
+		"INSERT INTO Media (user_id, object_key, media_type) VALUES (?, ?, ?)",
+		userID,
+		objectKey,
+		mediaType,
+	)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed to insert media metadata"})
+		return
+	}
+
+	// get the PK of the inserted media
+	mediaID, err := res.LastInsertId()
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed to read inserted media id"})
+		return
+	}
+
+
 	c.JSON(201, gin.H{
 		"message":    "uploaded",
+		"media_id":   mediaID,
 		"object_key": objectKey,
 		"filename":   fh.Filename,
 		"mime_type":  mimeType,
 		"size":       fh.Size,
 		"user_id":    userID,
 	})
+
 }
