@@ -1,6 +1,7 @@
 package main
 
 import (
+	"snapstash/internal/config"
 	"snapstash/internal/auth"
 	"database/sql"
 	"github.com/gin-gonic/gin"
@@ -8,6 +9,9 @@ import (
 )
 
 func main() {
+	cfg := config.Load()
+	_ = cfg
+
 	// configure db
 	db, err := sql.Open("mysql", "root:rootpassword@tcp(localhost:3306)/snapstash")
 	if err != nil {
