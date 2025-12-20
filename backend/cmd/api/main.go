@@ -3,6 +3,7 @@ package main
 import (
 	"snapstash/internal/config"
 	"snapstash/internal/auth"
+	"snapstash/internal/media"
 	"database/sql"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
@@ -49,10 +50,8 @@ func main() {
 	// media upload routing
 	mediaGroup := router.Group("/api/media")
 	mediaGroup.POST("/upload", func(c *gin.Context) {
-		// TODO: implement upload
-		c.JSON(501, gin.H{"error": "not implemented"})
+		media.PostUpload(c, db, minioClient)
 	})
-
 
 	// run router
 	router.Run(":8080") // Gin is running and listening on this port
