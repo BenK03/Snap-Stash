@@ -148,4 +148,26 @@ func GetMedia(c *gin.Context, db *sql.DB) {
 	}
 	defer rows.Close()
 
+	items := []MediaItem{}
+
+	// iterate through each row we got from query and turn them into MediaItem structs
+	for rows.Next() {
+		var item MediaItem
+
+		err := rows.Scan(
+			&item.MediaID,
+			&item.ObjectKey,
+			&item.MediaType,
+			&item.CreatedAt,
+		)
+		if err != nil {
+			c.JSON(500, gin.H{"error": "failed to read media row"})
+			return
+		}
+
+		items = append(items, item)
+	}
+
+
+
 }
