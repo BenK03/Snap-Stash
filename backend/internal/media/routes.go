@@ -90,7 +90,8 @@ func PostUpload(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 
 	// insert media data into media table.
 	res, err := db.Exec(
-		"INSERT INTO Media (user_id, object_key, media_type) VALUES (?, ?, ?)",
+		// calls MySQL and Inserts userID, objectKey,mediaType and returns res and err
+		"INSERT INTO Media (user_id, object_key, media_type) VALUES (?, ?, ?)", 
 		userID,
 		objectKey,
 		mediaType,
@@ -120,7 +121,6 @@ func PostUpload(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 }
 
 func GetMedia(c *gin.Context, db *sql.DB) {
-	
 	// get user id/check if it is valid
 	userIDRaw := strings.TrimSpace(c.GetHeader("X-User-ID"))
 	if userIDRaw == "" { // if user id missing
@@ -133,4 +133,19 @@ func GetMedia(c *gin.Context, db *sql.DB) {
 		c.JSON(400, gin.H{"error": "invalid X-User-ID header"})
 		return
 	}
+
+	rows, err := db.Query(
+		// calls MySQL and selects media table where user_id matches the given userID
+		`SELECT media_id, object_key, media_type, created_at
+		FROM Media
+		WHERE user_id = ?
+		ORDER BY created_at DESC, media_id DESC`,
+		userID,
+	)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed to query media"})
+		return
+	}
+	defer rows.Close()
+
 }

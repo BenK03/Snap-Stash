@@ -37,6 +37,7 @@ func main() {
 	// configure router
 	router := gin.Default()
 
+	// Endpoints
 	// auth routing
 	authGroup := router.Group("/api/auth")
 	authGroup.POST("/register", func(c *gin.Context) {
@@ -52,6 +53,12 @@ func main() {
 	mediaGroup.POST("/upload", func(c *gin.Context) {
 		media.PostUpload(c, db, minioClient)
 	})
+
+	// TODO: list media metadata
+	mediaGroup.GET("", func(c *gin.Context) {
+		media.GetMedia(c, db)
+	})
+
 
 	// run router
 	router.Run(":8080") // Gin is running and listening on this port
