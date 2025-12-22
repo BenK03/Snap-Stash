@@ -179,6 +179,24 @@ func GetMediaFile(c *gin.Context, db *sql.DB, minioClient *snapminio.Client, rdb
 		return
 	}
 
+	// redis cache config (demo defaults)
+	cacheKey := fmt.Sprintf("media:bytes:%d", mediaID)
+
+	cacheTTL := 60 * time.Second                 // cache expires after 60 seconds
+	cacheMaxBytes := int64(5 * 1024 * 1024)      // 5MB max guard
+
+	// try redis cache first
+	ctx := context.Background()
+
+	cachedBytes, err := rdb.Get(ctx, cacheKey).Bytes()
+	if err == nil {
+		// cache HIT: serve bytes immediately
+		c.Data(200, "application/octet-stream", cachedBytes)
+		return
+	}
+
+
+
 	// look up object_key for this media
 	var objectKey string
 
