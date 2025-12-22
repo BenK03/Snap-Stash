@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 	"github.com/gin-gonic/gin"
+	"fmt"
 )
 
 func VerifyUserID(c *gin.Context) (int, error) {
@@ -34,4 +35,22 @@ func VerifyMediaID(c *gin.Context) (int, error) {
 	}
 
 	return mediaID, nil
+}
+
+func MediaBytesCacheKey(mediaID int) string {
+	return fmt.Sprintf("media:bytes:%d", mediaID)
+}
+
+func MediaCTypeCacheKey(mediaID int) string {
+	return fmt.Sprintf("media:ctype:%d", mediaID)
+}
+
+func CanCacheMedia(size int64, maxBytes int64) bool {
+	if size <= 0 {
+		return false
+	}
+	if size > maxBytes {
+		return false
+	}
+	return true
 }

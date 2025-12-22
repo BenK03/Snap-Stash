@@ -4,13 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"io"
 	snapminio "snapstash/internal/storage/minio"
 	"strings"
 	"time"
 
-	"github.com/redis/go-redis/v9"
 	"github.com/gin-gonic/gin"
 	minio "github.com/minio/minio-go/v7"
+	"github.com/redis/go-redis/v9"
 )
 
 // Pipeline HTTP → Gin → Validation → MinIO → MySQL → JSON response
@@ -180,10 +181,11 @@ func GetMediaFile(c *gin.Context, db *sql.DB, minioClient *snapminio.Client, rdb
 	}
 
 	// redis cache config (demo defaults)
-	cacheKey := fmt.Sprintf("media:bytes:%d", mediaID)
+	cacheKey := MediaBytesCacheKey(mediaID)
+	cacheCTypeKey := MediaCTypeCacheKey(mediaID)
 
-	cacheTTL := 60 * time.Second                 // cache expires after 60 seconds
-	cacheMaxBytes := int64(5 * 1024 * 1024)      // 5MB max guard
+	cacheTTL := 60 * time.Second            // cache expires after 60 seconds
+	cacheMaxBytes := int64(5 * 1024 * 1024) // 5MB max guard
 
 	// try redis cache first
 	ctx := context.Background()
@@ -194,8 +196,6 @@ func GetMediaFile(c *gin.Context, db *sql.DB, minioClient *snapminio.Client, rdb
 		c.Data(200, "application/octet-stream", cachedBytes)
 		return
 	}
-
-
 
 	// look up object_key for this media
 	var objectKey string
@@ -219,11 +219,10 @@ func GetMediaFile(c *gin.Context, db *sql.DB, minioClient *snapminio.Client, rdb
 	}
 
 	// if all is good fetch the media from minio and stream to client
-
-	ctx := context.Background()
+	ctxStorage := context.Background()
 
 	obj, err := minioClient.MC.GetObject(
-		ctx,
+		ctxStorage,
 		minioClient.Bucket,
 		objectKey,
 		minio.GetObjectOptions{},
@@ -232,6 +231,7 @@ func GetMediaFile(c *gin.Context, db *sql.DB, minioClient *snapminio.Client, rdb
 		c.JSON(500, gin.H{"error": "failed to read from storage"})
 		return
 	}
+	defer obj.Close()
 
 	stat, err := obj.Stat()
 	if err != nil {
@@ -244,7 +244,22 @@ func GetMediaFile(c *gin.Context, db *sql.DB, minioClient *snapminio.Client, rdb
 		contentType = "application/octet-stream"
 	}
 
-	// send back to client
+	// if small enough, cache bytes in redis otherwise stream
+	if CanCacheMedia(stat.Size, cacheMaxBytes) {
+		data, err := io.ReadAll(obj)
+		if err != nil {
+			c.JSON(500, gin.H{"error": "failed to read stored object"})
+			return
+		}
+
+		// store in redis
+		_ = rdb.Set(ctx, cacheCTypeKey, contentType, cacheTTL).Err()
+
+		c.Data(200, contentType, data)
+		return
+	}
+
+	// stream
 	c.DataFromReader(
 		200,
 		stat.Size,
@@ -252,6 +267,7 @@ func GetMediaFile(c *gin.Context, db *sql.DB, minioClient *snapminio.Client, rdb
 		obj,
 		nil,
 	)
+
 }
 
 // Delete selected media
