@@ -250,6 +250,19 @@ func DeleteMedia(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-
 	_ = userID
+
+	// get media id from URL and validate it
+	mediaIDRaw := strings.TrimSpace(c.Param("media_id"))
+	if mediaIDRaw == "" {
+		c.JSON(400, gin.H{"error": "missing media_id"})
+		return
+	}
+
+	mediaID, err := strconv.Atoi(mediaIDRaw)
+	if err != nil || mediaID <= 0 {
+		c.JSON(400, gin.H{"error": "invalid media_id"})
+		return
+	}
+
 }

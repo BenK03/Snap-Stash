@@ -21,3 +21,17 @@ func VerifyUserID(c *gin.Context) (int, error) {
 
 	return userID, nil
 }
+
+func VerifyMediaID(c *gin.Context) (int, error) {
+	mediaIDRaw := strings.TrimSpace(c.Param("media_id"))
+	if mediaIDRaw == "" {
+		return 0, errors.New("missing media_id")
+	}
+
+	mediaID, err := strconv.Atoi(mediaIDRaw)
+	if err != nil || mediaID <= 0 {
+		return 0, errors.New("invalid media_id")
+	}
+
+	return mediaID, nil
+}
