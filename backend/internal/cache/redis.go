@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
-
+	"time"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -13,7 +13,9 @@ type RedisCache struct {
 	Rdb *redis.Client
 }
 
+// create new redis cache
 func NewRedisCache() (*RedisCache, error) {
+
 	addr := strings.TrimSpace(os.Getenv("REDIS_ADDR"))
 	if addr == "" { // if address not set use default
 		addr = "localhost:6379"
@@ -35,5 +37,5 @@ func NewRedisCache() (*RedisCache, error) {
 	}
 
 	return &cache, nil
-
 }
+
