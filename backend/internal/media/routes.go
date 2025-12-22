@@ -164,6 +164,7 @@ func GetMedia(c *gin.Context, db *sql.DB) {
 }
 
 // Stream to client
+// Pipeline HTTP → Validation → Redis → MySQL → MinIO → Client
 func GetMediaFile(c *gin.Context, db *sql.DB, minioClient *snapminio.Client, rdb *redis.Client) {
 
 	// validate user ID
