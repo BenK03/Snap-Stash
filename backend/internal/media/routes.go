@@ -15,7 +15,7 @@ import (
 )
 
 // Pipeline HTTP → Gin → Validation → MinIO → MySQL → JSON response
-func PostUpload(c *gin.Context, db *sql.DB, minioClient *snapminio.Client, rdb *redis.Client) {
+func PostUpload(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 
 	// validate user ID
 	userID, err := VerifyUserID(c)
@@ -115,7 +115,7 @@ func PostUpload(c *gin.Context, db *sql.DB, minioClient *snapminio.Client, rdb *
 
 }
 
-func GetMedia(c *gin.Context, db *sql.DB, rdb *redis.Client) {
+func GetMedia(c *gin.Context, db *sql.DB) {
 	// validate user ID
 	userID, err := VerifyUserID(c)
 	if err != nil {
@@ -180,7 +180,7 @@ func GetMediaFile(c *gin.Context, db *sql.DB, minioClient *snapminio.Client, rdb
 		return
 	}
 
-	// redis cache config (demo defaults)
+	// redis cache  (demo defaults)
 	cacheKey := MediaBytesCacheKey(mediaID)
 	cacheCTypeKey := MediaCTypeCacheKey(mediaID)
 
@@ -192,12 +192,17 @@ func GetMediaFile(c *gin.Context, db *sql.DB, minioClient *snapminio.Client, rdb
 
 	cachedBytes, err := rdb.Get(ctx, cacheKey).Bytes()
 	if err == nil {
-		// cache HIT: serve bytes immediately
-		c.Data(200, "application/octet-stream", cachedBytes)
+		cachedCType := strings.TrimSpace(rdb.Get(ctx, cacheCTypeKey).Val())
+		if cachedCType == "" {
+			cachedCType = "application/octet-stream"
+		}
+
+		// cache hit: send cached bytes
+		c.Data(200, cachedCType, cachedBytes)
 		return
 	}
 
-	// look up object_key for this media
+	// cache miss: look up object_key for this media
 	var objectKey string
 
 	err = db.QueryRow(
@@ -244,7 +249,8 @@ func GetMediaFile(c *gin.Context, db *sql.DB, minioClient *snapminio.Client, rdb
 		contentType = "application/octet-stream"
 	}
 
-	// if small enough, cache bytes in redis otherwise stream
+	// store frequently viewed media in redis cache
+	// if small enough, cache in redis
 	if CanCacheMedia(stat.Size, cacheMaxBytes) {
 		data, err := io.ReadAll(obj)
 		if err != nil {
@@ -252,14 +258,15 @@ func GetMediaFile(c *gin.Context, db *sql.DB, minioClient *snapminio.Client, rdb
 			return
 		}
 
-		// store in redis
+		// store in bytes & content-type in redis
+		_ = rdb.Set(ctx, cacheKey, data, cacheTTL).Err()
 		_ = rdb.Set(ctx, cacheCTypeKey, contentType, cacheTTL).Err()
 
 		c.Data(200, contentType, data)
 		return
 	}
 
-	// stream
+	// send from minio
 	c.DataFromReader(
 		200,
 		stat.Size,
@@ -271,7 +278,7 @@ func GetMediaFile(c *gin.Context, db *sql.DB, minioClient *snapminio.Client, rdb
 }
 
 // Delete selected media
-func DeleteMedia(c *gin.Context, db *sql.DB, minioClient *snapminio.Client, rdb *redis.Client) {
+func DeleteMedia(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 	// validate user ID
 	userID, err := VerifyUserID(c)
 	if err != nil {

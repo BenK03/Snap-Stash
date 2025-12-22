@@ -5,9 +5,9 @@ import (
 	"log"
 	"os"
 	"snapstash/internal/auth"
+	"snapstash/internal/cache"
 	"snapstash/internal/config"
 	"snapstash/internal/media"
-	"snapstash/internal/cache"
 	snapminio "snapstash/internal/storage/minio"
 
 	"github.com/gin-gonic/gin"
@@ -22,7 +22,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to init minio: %v", err)
 	}
-	_ = minioClient
 
 	// configure redis
 	rdb, err := cache.NewRedisClient()
@@ -59,12 +58,12 @@ func main() {
 	// media upload routing
 	mediaGroup := router.Group("/api/media")
 	mediaGroup.POST("/upload", func(c *gin.Context) {
-		media.PostUpload(c, db, minioClient, rdb)
+		media.PostUpload(c, db, minioClient)
 	})
 
 	// list media metadata
 	mediaGroup.GET("", func(c *gin.Context) {
-		media.GetMedia(c, db, rdb)
+		media.GetMedia(c, db)
 	})
 
 	// send thumbnails to frontend
@@ -74,7 +73,7 @@ func main() {
 
 	// delete media
 	mediaGroup.DELETE("/:media_id", func(c *gin.Context) {
-		media.DeleteMedia(c, db, minioClient, rdb)
+		media.DeleteMedia(c, db, minioClient)
 	})
 
 	// run router
