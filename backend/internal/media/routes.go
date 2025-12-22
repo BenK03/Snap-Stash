@@ -173,3 +173,7 @@ func GetMedia(c *gin.Context, db *sql.DB) {
 		"items": items,
 	})
 }
+
+func GetMediaFile(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
+
+}

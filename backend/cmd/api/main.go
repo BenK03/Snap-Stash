@@ -54,11 +54,15 @@ func main() {
 		media.PostUpload(c, db, minioClient)
 	})
 
-	// TODO: list media metadata
+	// list media metadata
 	mediaGroup.GET("", func(c *gin.Context) {
 		media.GetMedia(c, db)
 	})
 
+	// send thumbnails to frontend
+	mediaGroup.GET("/:media_id/file", func(c *gin.Context) {
+		media.GetMediaFile(c, db, minioClient)
+	})
 
 	// run router
 	router.Run(":8080") // Gin is running and listening on this port
