@@ -7,7 +7,7 @@ import (
 	snapminio "snapstash/internal/storage/minio"
 	"strings"
 	"time"
-
+	"strconv"
 	"github.com/gin-gonic/gin"
 	minio "github.com/minio/minio-go/v7"
 )
@@ -171,5 +171,18 @@ func GetMediaFile(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 	}
 
 	_ = userID
+
+	// get media id from URL param and validate it
+	mediaIDRaw := strings.TrimSpace(c.Param("media_id"))
+	if mediaIDRaw == "" {
+		c.JSON(400, gin.H{"error": "missing media_id"})
+		return
+	}
+
+	mediaID, err := strconv.Atoi(mediaIDRaw)
+	if err != nil || mediaID <= 0 {
+		c.JSON(400, gin.H{"error": "invalid media_id"})
+		return
+	}
 
 }
