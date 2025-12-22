@@ -170,8 +170,6 @@ func GetMediaFile(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 		return
 	}
 
-	_ = userID
-
 	// get media id from URL param and validate it
 	mediaIDRaw := strings.TrimSpace(c.Param("media_id"))
 	if mediaIDRaw == "" {
@@ -184,5 +182,61 @@ func GetMediaFile(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 		c.JSON(400, gin.H{"error": "invalid media_id"})
 		return
 	}
+
+	// look up object_key for this media
+	var objectKey string
+
+	err = db.QueryRow(
+		`SELECT object_key
+		FROM Media
+		WHERE media_id = ? AND user_id = ?
+		LIMIT 1`,
+		mediaID,
+		userID,
+	).Scan(&objectKey)
+
+	if err == sql.ErrNoRows {
+		c.JSON(404, gin.H{"error": "media not found"})
+		return
+	}
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed to look up media"})
+		return
+	}
+
+	// if all is good fetch the media from minio and stream to client
+
+	ctx := context.Background()
+
+	obj, err := minioClient.MC.GetObject(
+		ctx,
+		minioClient.Bucket,
+		objectKey,
+		minio.GetObjectOptions{},
+	)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed to read from storage"})
+		return
+	}
+
+	stat, err := obj.Stat()
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed to stat stored object"})
+		return
+	}
+
+	contentType := stat.ContentType
+	if strings.TrimSpace(contentType) == "" {
+		contentType = "application/octet-stream"
+	}
+
+	// send back to client
+	c.DataFromReader(
+		200,
+		stat.Size,
+		contentType,
+		obj,
+		nil,
+	)
 
 }
