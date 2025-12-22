@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	snapminio "snapstash/internal/storage/minio"
-	"strconv"
 	"strings"
 	"time"
 
@@ -16,16 +15,10 @@ import (
 // Pipeline HTTP → Gin → Validation → MinIO → MySQL → JSON response
 func PostUpload(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 
-	// get user id/check if it is valid
-	userIDRaw := strings.TrimSpace(c.GetHeader("X-User-ID"))
-	if userIDRaw == "" { // if user id missing
-		c.JSON(400, gin.H{"error": "missing X-User-ID header"})
-		return
-	}
-
-	userID, err := strconv.Atoi(userIDRaw) // convert the id to a integer
-	if err != nil || userID <= 0 {         // if non integer or equal to 0 or less return error
-		c.JSON(400, gin.H{"error": "invalid X-User-ID header"})
+	// validate user ID
+	userID, err := VerifyUserID(c)
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -121,16 +114,10 @@ func PostUpload(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 }
 
 func GetMedia(c *gin.Context, db *sql.DB) {
-	// get user id/check if it is valid
-	userIDRaw := strings.TrimSpace(c.GetHeader("X-User-ID"))
-	if userIDRaw == "" { // if user id missing
-		c.JSON(400, gin.H{"error": "missing X-User-ID header"})
-		return
-	}
-
-	userID, err := strconv.Atoi(userIDRaw) // convert the id to a integer
-	if err != nil || userID <= 0 {         // if non integer or equal to 0 or less return error
-		c.JSON(400, gin.H{"error": "invalid X-User-ID header"})
+	// validate user ID
+	userID, err := VerifyUserID(c)
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -175,5 +162,14 @@ func GetMedia(c *gin.Context, db *sql.DB) {
 }
 
 func GetMediaFile(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
+
+	// validate user ID
+	userID, err := VerifyUserID(c)
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	_ = userID
 
 }
