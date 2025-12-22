@@ -6,37 +6,29 @@ import (
 	"os"
 	"strings"
 	"time"
+
 	"github.com/redis/go-redis/v9"
 )
 
-type RedisCache struct {
-	Rdb *redis.Client
-}
-
 // create new redis cache
-func NewRedisCache() (*RedisCache, error) {
-
+func NewRedisClient() (*redis.Client, error) {
 	addr := strings.TrimSpace(os.Getenv("REDIS_ADDR"))
-	if addr == "" { // if address not set use default
+	if addr == "" {
 		addr = "localhost:6379"
 	}
 
-	// create redis client
-	rdb := redis.NewClient(&redis.Options{
+	opts := &redis.Options{
 		Addr: addr,
-	})
+	}
+
+	rdb := redis.NewClient(opts)
 
 	ctx := context.Background()
-	if err := rdb.Ping(ctx).Err(); err != nil { // check if properly connected
+	if err := rdb.Ping(ctx).Err(); err != nil {
 		return nil, fmt.Errorf("redis ping failed: %w", err)
 	}
 
-	// convert to struct
-	cache := RedisCache{
-		Rdb: rdb,
-	}
-
-	return &cache, nil
+	return rdb, nil
 }
 
 // set bytes

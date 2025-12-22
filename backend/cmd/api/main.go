@@ -7,6 +7,7 @@ import (
 	"snapstash/internal/auth"
 	"snapstash/internal/config"
 	"snapstash/internal/media"
+	"snapstash/internal/cache"
 	snapminio "snapstash/internal/storage/minio"
 
 	"github.com/gin-gonic/gin"
@@ -22,6 +23,13 @@ func main() {
 		log.Fatalf("failed to init minio: %v", err)
 	}
 	_ = minioClient
+
+	// configure redis
+	rdb, err := cache.NewRedisClient()
+	if err != nil {
+		log.Fatalf("failed to init redis: %v", err)
+	}
+	_ = rdb
 
 	// configure db
 	dsn := os.Getenv("MYSQL_DSN")
