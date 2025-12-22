@@ -39,3 +39,21 @@ func NewRedisCache() (*RedisCache, error) {
 	return &cache, nil
 }
 
+// set bytes
+func GetBytes(ctx context.Context, rdb *redis.Client, key string) ([]byte, error) {
+	b, err := rdb.Get(ctx, key).Bytes()
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
+}
+
+// set bytes with ttl (auto delete after duration)
+func SetBytesTTL(ctx context.Context, rdb *redis.Client, key string, value []byte, ttl time.Duration) error {
+	return rdb.Set(ctx, key, value, ttl).Err()
+}
+
+// deletes
+func DelKey(ctx context.Context, rdb *redis.Client, key string) error {
+	return rdb.Del(ctx, key).Err()
+}
