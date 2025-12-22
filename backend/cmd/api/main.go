@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"snapstash/internal/auth"
+	"snapstash/internal/cache"
 	"snapstash/internal/config"
 	"snapstash/internal/media"
 	snapminio "snapstash/internal/storage/minio"
@@ -21,7 +22,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to init minio: %v", err)
 	}
-	_ = minioClient
+
+	// configure redis
+	rdb, err := cache.NewRedisClient()
+	if err != nil {
+		log.Fatalf("failed to init redis: %v", err)
+	}
 
 	// configure db
 	dsn := os.Getenv("MYSQL_DSN")
@@ -62,7 +68,7 @@ func main() {
 
 	// send thumbnails to frontend
 	mediaGroup.GET("/:media_id/file", func(c *gin.Context) {
-		media.GetMediaFile(c, db, minioClient)
+		media.GetMediaFile(c, db, minioClient, rdb)
 	})
 
 	// delete media
