@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -25,5 +24,16 @@ func NewRedisCache() (*RedisCache, error) {
 		Addr: addr,
 	})
 
+	ctx := context.Background()
+	if err := rdb.Ping(ctx).Err(); err != nil { // check if properly connected
+		return nil, fmt.Errorf("redis ping failed: %w", err)
+	}
+
+	// convert to struct
+	cache := RedisCache{
+		Rdb: rdb,
+	}
+
+	return &cache, nil
 
 }
