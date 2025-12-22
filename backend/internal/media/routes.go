@@ -168,6 +168,8 @@ func GetMedia(c *gin.Context, db *sql.DB) {
 		items = append(items, item)
 	}
 
-
-
+	// send response
+	c.JSON(200, gin.H{
+		"items": items,
+	})
 }
