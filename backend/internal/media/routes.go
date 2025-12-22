@@ -7,7 +7,7 @@ import (
 	snapminio "snapstash/internal/storage/minio"
 	"strings"
 	"time"
-	"strconv"
+
 	"github.com/gin-gonic/gin"
 	minio "github.com/minio/minio-go/v7"
 )
@@ -84,7 +84,7 @@ func PostUpload(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 	// insert media data into media table.
 	res, err := db.Exec(
 		// calls MySQL and Inserts userID, objectKey,mediaType and returns res and err
-		"INSERT INTO Media (user_id, object_key, media_type) VALUES (?, ?, ?)", 
+		"INSERT INTO Media (user_id, object_key, media_type) VALUES (?, ?, ?)",
 		userID,
 		objectKey,
 		mediaType,
@@ -112,7 +112,6 @@ func PostUpload(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 	})
 
 }
-
 
 func GetMedia(c *gin.Context, db *sql.DB) {
 	// validate user ID
@@ -272,5 +271,33 @@ func DeleteMedia(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 		return
 	}
 
+	// delete object from minio
+	ctx := context.Background()
+
+	err = minioClient.MC.RemoveObject(
+		ctx,
+		minioClient.Bucket,
+		objectKey,
+		minio.RemoveObjectOptions{},
+	)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed to delete from storage"})
+		return
+	}
+
+	// delete row from database
+	_, err = db.Exec(
+		`DELETE FROM Media
+		WHERE media_id = ? AND user_id = ?`,
+		mediaID,
+		userID,
+	)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed to delete media metadata"})
+		return
+	}
+
+	// send http status
+	c.Status(204)
 
 }
