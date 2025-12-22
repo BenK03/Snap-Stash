@@ -1,15 +1,16 @@
 package main
 
 import (
-	"snapstash/internal/config"
-	"snapstash/internal/auth"
-	"snapstash/internal/media"
 	"database/sql"
-	"github.com/gin-gonic/gin"
-	_ "github.com/go-sql-driver/mysql"
-	snapminio "snapstash/internal/storage/minio"
 	"log"
 	"os"
+	"snapstash/internal/auth"
+	"snapstash/internal/config"
+	"snapstash/internal/media"
+	snapminio "snapstash/internal/storage/minio"
+
+	"github.com/gin-gonic/gin"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
@@ -62,6 +63,11 @@ func main() {
 	// send thumbnails to frontend
 	mediaGroup.GET("/:media_id/file", func(c *gin.Context) {
 		media.GetMediaFile(c, db, minioClient)
+	})
+
+	// delete media
+	mediaGroup.DELETE("/:media_id", func(c *gin.Context) {
+		media.DeleteMedia(c, db, minioClient)
 	})
 
 	// run router

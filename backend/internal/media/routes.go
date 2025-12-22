@@ -113,6 +113,7 @@ func PostUpload(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 
 }
 
+
 func GetMedia(c *gin.Context, db *sql.DB) {
 	// validate user ID
 	userID, err := VerifyUserID(c)
@@ -161,6 +162,7 @@ func GetMedia(c *gin.Context, db *sql.DB) {
 	})
 }
 
+// Stream to client
 func GetMediaFile(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 
 	// validate user ID
@@ -238,5 +240,16 @@ func GetMediaFile(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 		obj,
 		nil,
 	)
+}
 
+// Delete selected media
+func DeleteMedia(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
+	// validate user ID
+	userID, err := VerifyUserID(c)
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	_ = userID
 }
