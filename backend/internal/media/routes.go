@@ -8,12 +8,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/gin-gonic/gin"
 	minio "github.com/minio/minio-go/v7"
 )
 
 // Pipeline HTTP → Gin → Validation → MinIO → MySQL → JSON response
-func PostUpload(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
+func PostUpload(c *gin.Context, db *sql.DB, minioClient *snapminio.Client, rdb *redis.Client) {
 
 	// validate user ID
 	userID, err := VerifyUserID(c)
@@ -113,7 +114,7 @@ func PostUpload(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 
 }
 
-func GetMedia(c *gin.Context, db *sql.DB) {
+func GetMedia(c *gin.Context, db *sql.DB, rdb *redis.Client) {
 	// validate user ID
 	userID, err := VerifyUserID(c)
 	if err != nil {
@@ -162,7 +163,7 @@ func GetMedia(c *gin.Context, db *sql.DB) {
 }
 
 // Stream to client
-func GetMediaFile(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
+func GetMediaFile(c *gin.Context, db *sql.DB, minioClient *snapminio.Client, rdb *redis.Client) {
 
 	// validate user ID
 	userID, err := VerifyUserID(c)
@@ -236,7 +237,7 @@ func GetMediaFile(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 }
 
 // Delete selected media
-func DeleteMedia(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
+func DeleteMedia(c *gin.Context, db *sql.DB, minioClient *snapminio.Client, rdb *redis.Client) {
 	// validate user ID
 	userID, err := VerifyUserID(c)
 	if err != nil {

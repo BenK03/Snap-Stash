@@ -29,7 +29,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to init redis: %v", err)
 	}
-	_ = rdb
 
 	// configure db
 	dsn := os.Getenv("MYSQL_DSN")
@@ -60,22 +59,22 @@ func main() {
 	// media upload routing
 	mediaGroup := router.Group("/api/media")
 	mediaGroup.POST("/upload", func(c *gin.Context) {
-		media.PostUpload(c, db, minioClient)
+		media.PostUpload(c, db, minioClient, rdb)
 	})
 
 	// list media metadata
 	mediaGroup.GET("", func(c *gin.Context) {
-		media.GetMedia(c, db)
+		media.GetMedia(c, db, rdb)
 	})
 
 	// send thumbnails to frontend
 	mediaGroup.GET("/:media_id/file", func(c *gin.Context) {
-		media.GetMediaFile(c, db, minioClient)
+		media.GetMediaFile(c, db, minioClient, rdb)
 	})
 
 	// delete media
 	mediaGroup.DELETE("/:media_id", func(c *gin.Context) {
-		media.DeleteMedia(c, db, minioClient)
+		media.DeleteMedia(c, db, minioClient, rdb)
 	})
 
 	// run router
