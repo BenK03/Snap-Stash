@@ -173,15 +173,9 @@ func GetMediaFile(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 	}
 
 	// get media id from URL param and validate it
-	mediaIDRaw := strings.TrimSpace(c.Param("media_id"))
-	if mediaIDRaw == "" {
-		c.JSON(400, gin.H{"error": "missing media_id"})
-		return
-	}
-
-	mediaID, err := strconv.Atoi(mediaIDRaw)
-	if err != nil || mediaID <= 0 {
-		c.JSON(400, gin.H{"error": "invalid media_id"})
+	mediaID, err := VerifyMediaID(c)
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -250,19 +244,33 @@ func DeleteMedia(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-	_ = userID
 
-	// get media id from URL and validate it
-	mediaIDRaw := strings.TrimSpace(c.Param("media_id"))
-	if mediaIDRaw == "" {
-		c.JSON(400, gin.H{"error": "missing media_id"})
+	mediaID, err := VerifyMediaID(c)
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
-	mediaID, err := strconv.Atoi(mediaIDRaw)
-	if err != nil || mediaID <= 0 {
-		c.JSON(400, gin.H{"error": "invalid media_id"})
+	// look up object_key for this media and enforce ownership
+	var objectKey string
+
+	err = db.QueryRow(
+		`SELECT object_key
+		FROM Media
+		WHERE media_id = ? AND user_id = ?
+		LIMIT 1`,
+		mediaID,
+		userID,
+	).Scan(&objectKey)
+
+	if err == sql.ErrNoRows {
+		c.JSON(404, gin.H{"error": "media not found"})
 		return
 	}
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed to look up media"})
+		return
+	}
+
 
 }
