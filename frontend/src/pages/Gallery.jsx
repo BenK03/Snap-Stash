@@ -25,8 +25,36 @@ function Gallery() {
   return (
     <div>
       <h1>Gallery</h1>
+
       {error ? <div>{error}</div> : null}
-      <div>Items loaded: {items.length}</div>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: 12,
+        }}
+      >
+        {items.map((it) => {
+          return (
+            <div
+              key={it.media_id}
+              style={{
+                border: "1px solid #ddd",
+                height: 180,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexDirection: "column",
+                gap: 6,
+              }}
+            >
+              <div>id: {it.media_id}</div>
+              <div>{it.media_type}</div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
