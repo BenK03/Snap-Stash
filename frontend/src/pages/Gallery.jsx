@@ -5,6 +5,7 @@ import { apiFetch } from "../api";
 function Gallery() {
   const [items, setItems] = useState([]);
   const [error, setError] = useState("");
+  const [thumbUrls, setThumbUrls] = useState({});
 
   useEffect(() => {
     async function loadMedia() {
@@ -13,7 +14,20 @@ function Gallery() {
       try {
         const res = await apiFetch("/media");
         const data = await res.json();
-        setItems(data.items || []);
+
+        const list = data.items || [];
+        setItems(list);
+
+        const urls = {};
+
+        for (const it of list) {
+          const fileRes = await apiFetch(`/media/${it.media_id}/file`);
+          const blob = await fileRes.blob();
+          const url = URL.createObjectURL(blob);
+          urls[it.media_id] = url;
+        }
+
+        setThumbUrls(urls);
       } catch (e) {
         setError(e.message || "failed to load media");
       }
@@ -36,22 +50,53 @@ function Gallery() {
         }}
       >
         {items.map((it) => {
+          const url = thumbUrls[it.media_id];
+
+          if (!url) {
+            return (
+              <div
+                key={it.media_id}
+                style={{
+                  border: "1px solid #ddd",
+                  height: 180,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                loading...
+              </div>
+            );
+          }
+
+          if (it.media_type === "video") {
+            return (
+              <video
+                key={it.media_id}
+                src={url}
+                controls
+                style={{
+                  width: "100%",
+                  height: 180,
+                  objectFit: "cover",
+                  border: "1px solid #ddd",
+                }}
+              />
+            );
+          }
+
           return (
-            <div
+            <img
               key={it.media_id}
+              src={url}
+              alt=""
               style={{
-                border: "1px solid #ddd",
+                width: "100%",
                 height: 180,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexDirection: "column",
-                gap: 6,
+                objectFit: "cover",
+                border: "1px solid #ddd",
               }}
-            >
-              <div>id: {it.media_id}</div>
-              <div>{it.media_type}</div>
-            </div>
+            />
           );
         })}
       </div>
