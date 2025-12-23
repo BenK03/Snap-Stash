@@ -50,33 +50,48 @@ function Gallery() {
             gap: 12,
           }}
         >
-        {items.map((it) => {
-          const url = thumbUrls[it.media_id];
+          {items.map((it) => {
+            const url = thumbUrls[it.media_id];
 
-          if (!url) {
-            return (
-              <div
-                key={it.media_id}
-                style={{
-                  border: "2px solid black",
-                  height: 120,
-                  width: 120,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                loading...
-              </div>
-            );
-          }
+            if (!url) {
+              return (
+                <div
+                  key={it.media_id}
+                  style={{
+                    border: "2px solid black",
+                    height: 120,
+                    width: 120,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  loading...
+                </div>
+              );
+            }
 
-          if (it.media_type === "video") {
+            if (it.media_type === "video") {
+              return (
+                <video
+                  key={it.media_id}
+                  src={url}
+                  controls
+                  style={{
+                    width: 120,
+                    height: 120,
+                    objectFit: "cover",
+                    border: "2px solid black",
+                  }}
+                />
+              );
+            }
+
             return (
-              <video
+              <img
                 key={it.media_id}
                 src={url}
-                controls
+                alt=""
                 style={{
                   width: 120,
                   height: 120,
@@ -85,22 +100,7 @@ function Gallery() {
                 }}
               />
             );
-          }
-
-          return (
-            <img
-              key={it.media_id}
-              src={url}
-              alt=""
-              style={{
-                width: 120,
-                height: 120,
-                objectFit: "cover",
-                border: "2px solid black",
-              }}
-            />
-          );
-        })}
+          })}
         </div>
       </div>
     </div>
