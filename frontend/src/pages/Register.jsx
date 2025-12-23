@@ -54,7 +54,7 @@ function Register() {
       }
 
       localStorage.setItem("user_id", String(loginData.user_id));
-      navigate("/");
+      navigate("/gallery", { replace: true });
     } catch (e2) {
       setError(e2.message || "register failed");
     } finally {

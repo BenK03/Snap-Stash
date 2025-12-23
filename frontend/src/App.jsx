@@ -14,23 +14,25 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+
           <Route
-            path="/"
+            path="/gallery"
             element={
-              localStorage.getItem("user_id") ? (
-                <Gallery />
-              ) : (
-                <Navigate to="/register" replace />
-              )
+              localStorage.getItem("user_id")
+                ? <Gallery />
+                : <Navigate to="/register" replace />
             }
           />
-          <Route path="/albums" element={<Albums />} />
-          <Route path="/vault" element={<Vault />} />
+
+          {/* default route */}
+          <Route
+            path="/"
+            element={<Navigate to="/register" replace />}
+          />
         </Routes>
       </div>
     </div>
   );
 }
 
-
-export default App
+export default App;

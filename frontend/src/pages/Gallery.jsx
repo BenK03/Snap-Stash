@@ -1,8 +1,14 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../api";
+import { Navigate } from "react-router-dom";
 
 // Loads the user's media list from the backend when the Gallery page mounts
 function Gallery() {
+  const userId = localStorage.getItem("user_id");
+
+  if (!userId) {
+    return <Navigate to="/register" replace />;
+  }
   const [items, setItems] = useState([]);
   const [error, setError] = useState("");
   const [thumbUrls, setThumbUrls] = useState({});
