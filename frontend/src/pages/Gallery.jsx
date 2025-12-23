@@ -225,23 +225,44 @@ function Gallery() {
             }
 
             return (
-              <img
-                key={it.media_id}
-                src={url}
-                alt=""
-                onClick={() => setSelected({
-                  media_id: it.media_id,
-                  media_type: it.media_type,
-                  url,
-                })}
-                style={{
-                  width: 120,
-                  height: 120,
-                  objectFit: "cover",
-                  border: "2px solid black",
-                  cursor: "pointer",
-                }}
-              />
+              <div key={it.media_id} style={{ position: "relative", width: 120, height: 120 }}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(it.media_id);
+                  }}
+                  disabled={deletingId === it.media_id}
+                  style={{
+                    position: "absolute",
+                    top: 6,
+                    right: 6,
+                    zIndex: 2,
+                    cursor: "pointer",
+                  }}
+                >
+                  X
+                </button>
+
+                <img
+                  src={url}
+                  alt=""
+                  onClick={() =>
+                    setSelected({
+                      media_id: it.media_id,
+                      media_type: it.media_type,
+                      url,
+                    })
+                  }
+                  style={{
+                    width: 120,
+                    height: 120,
+                    objectFit: "cover",
+                    border: "2px solid black",
+                    cursor: "pointer",
+                    display: "block",
+                  }}
+                />
+              </div>
             );
           })}
         </div>
