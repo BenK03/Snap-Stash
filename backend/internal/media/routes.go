@@ -8,7 +8,8 @@ import (
 	snapminio "snapstash/internal/storage/minio"
 	"strings"
 	"time"
-
+	"bytes"
+	"net/http"
 	"github.com/gin-gonic/gin"
 	minio "github.com/minio/minio-go/v7"
 	"github.com/redis/go-redis/v9"
@@ -38,19 +39,30 @@ func PostUpload(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 	}
 
 	// reject uploads that aren't images or videos
-	mimeType := strings.TrimSpace(fh.Header.Get("Content-Type"))
-	if !strings.HasPrefix(mimeType, "image/") && !strings.HasPrefix(mimeType, "video/") {
-		c.JSON(415, gin.H{"error": "only image/* and video/* allowed"})
-		return
-	}
-
-	// check if we can open the file
+	// open uploaded file
 	file, err := fh.Open()
 	if err != nil {
 		c.JSON(500, gin.H{"error": "failed to open uploaded file"})
 		return
 	}
 	defer file.Close()
+
+	// sniff real content type from first 512 bytes (client headers lie / are inconsistent)
+	head := make([]byte, 512)
+	n, _ := io.ReadFull(file, head)
+	sniffed := http.DetectContentType(head[:n])
+
+	// allow only image/* or video/*
+	if !strings.HasPrefix(sniffed, "image/") && !strings.HasPrefix(sniffed, "video/") {
+		c.JSON(415, gin.H{"error": "only image/* and video/* allowed"})
+		return
+	}
+
+	// IMPORTANT: rebuild reader so MinIO upload includes the bytes we already read
+	reader := io.MultiReader(bytes.NewReader(head[:n]), file)
+
+	// use sniffed as the content-type going forward
+	mimeType := sniffed
 
 	// create minio path where file will be stored
 	objectKey := fmt.Sprintf(
@@ -67,7 +79,7 @@ func PostUpload(c *gin.Context, db *sql.DB, minioClient *snapminio.Client) {
 		ctx,
 		minioClient.Bucket,
 		objectKey,
-		file,
+		reader,
 		fh.Size,
 		minio.PutObjectOptions{ContentType: mimeType},
 	)
