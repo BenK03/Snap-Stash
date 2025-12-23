@@ -7,6 +7,7 @@ create table Users (
     created_at timestamp not null default current_timestamp
 );
 
+
 create table Media (
     media_id int unsigned auto_increment primary key,
     user_id int unsigned not null,

@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Gallery from "./pages/Gallery";
 import Albums from "./pages/Albums";
@@ -14,7 +14,16 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/" element={<Gallery />} />
+          <Route
+            path="/"
+            element={
+              localStorage.getItem("user_id") ? (
+                <Gallery />
+              ) : (
+                <Navigate to="/register" replace />
+              )
+            }
+          />
           <Route path="/albums" element={<Albums />} />
           <Route path="/vault" element={<Vault />} />
         </Routes>
