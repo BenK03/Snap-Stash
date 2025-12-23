@@ -3,6 +3,8 @@ import Navbar from "./components/Navbar";
 import Gallery from "./pages/Gallery";
 import Albums from "./pages/Albums";
 import Vault from "./pages/Vault";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 
 function App() {
   return (
@@ -10,6 +12,8 @@ function App() {
       <Navbar />
       <div style={{ padding: "12px" }}>
         <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/" element={<Gallery />} />
           <Route path="/albums" element={<Albums />} />
           <Route path="/vault" element={<Vault />} />
