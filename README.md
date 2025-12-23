@@ -33,11 +33,13 @@ docker compose up -d
 ```
 Open a new terminal and run:
 ```bash
+cd Snap-Stash
 cd backend
 go run ./cmd/api
 ```
 Open another terminal and run:
 ```bash
+cd Snap-Stash
 cd frontend
 npm install
 npm run dev
