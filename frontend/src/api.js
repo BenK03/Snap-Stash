@@ -1,17 +1,27 @@
 const API_BASE = "/api";
 
-// Calls the backend API to handle media-related operations
+// apiFetch(path, options)
+// - Sends requests to the backend under /api
+// - Automatically adds the X-User-ID header if the user is logged in
 export async function apiFetch(path, options = {}) {
+  const userId = localStorage.getItem("user_id");
+
+  const headers = {
+    ...(options.headers || {}),
+  };
+
+  if (userId) {
+    headers["X-User-ID"] = userId;
+  }
+
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
-    headers: {
-      "X-User-ID": "1",
-      ...(options.headers || {}),
-    },
+    headers,
   });
 
   if (!res.ok) {
-    throw new Error(`API error ${res.status}`);
+    const msg = await res.text();
+    throw new Error(msg || `API error ${res.status}`);
   }
 
   return res;

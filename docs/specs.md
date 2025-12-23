@@ -15,20 +15,17 @@ These requirements define the behaviours and features of the application.
 ### 1.4. Timeline Sorting
 - Organize and display media by date, functioning similarly to Snapchat memories.
 
-### 1.5. Album Management 
-- Allow users to create albums to organize their media.
-
-### 1.6. Privacy Storage
-- Allow users to upload photos/videos to a restricted area, separate from the main gallery.
-
-### 1.7. Caching 
+### 1.5. Caching 
 - Utilize Redis to cache frequently accessed data for faster retrieval.
+
+### 1.6. Object Storage
+- Utilize an object storage to store BLOB data.
 
 ## 2. Non-Functional Requirements
 These requirements define the constraints for the application.
 
 ### 2.1. Frontend/Usability
-- The frontend will be written in React and Tailwind.
+- The frontend will be written in HTML, CSS, and Javascript(React).
 - Ensure a clean and easy to use user interface.
 
 ### 2.2. Backend
@@ -44,9 +41,6 @@ These requirements define the constraints for the application.
 ### 2.5. Maintainability
 - The codebase should aim for high cohesion and low coupling to ensure future updates are easy to manage.
 
-### 2.6. Security
-- Access control must be enforced for privacy storage feature and through OAuth for account verification.
-
-### 2.7. Deployment & Environment
+### 2.6. Deployment & Environment
 - Application must be fully containerized via Docker to ensure the system can run locally on all machines.
 
