@@ -7,33 +7,37 @@ function Gallery() {
   const [error, setError] = useState("");
   const [thumbUrls, setThumbUrls] = useState({});
   const [selected, setSelected] = useState(null);
+  const [uploadFile, setUploadFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+
+  // Helper to load media and set state
+  async function loadMedia() {
+    setError("");
+
+    try {
+      const res = await apiFetch("/media");
+      const data = await res.json();
+
+      const list = data.items || [];
+      setItems(list);
+
+      const urls = {};
+
+      for (const it of list) {
+        const fileRes = await apiFetch(`/media/${it.media_id}/file`);
+        const blob = await fileRes.blob();
+        const url = URL.createObjectURL(blob);
+        urls[it.media_id] = url;
+      }
+
+      setThumbUrls(urls);
+    } catch (e) {
+      setError(e.message || "failed to load media");
+    }
+  }
 
   useEffect(() => {
-    async function loadMedia() {
-      setError("");
-
-      try {
-        const res = await apiFetch("/media");
-        const data = await res.json();
-
-        const list = data.items || [];
-        setItems(list);
-
-        const urls = {};
-
-        for (const it of list) {
-          const fileRes = await apiFetch(`/media/${it.media_id}/file`);
-          const blob = await fileRes.blob();
-          const url = URL.createObjectURL(blob);
-          urls[it.media_id] = url;
-        }
-
-        setThumbUrls(urls);
-      } catch (e) {
-        setError(e.message || "failed to load media");
-      }
-    }
-
     loadMedia();
 
     function onKeyDown(e) {
@@ -49,9 +53,61 @@ function Gallery() {
     };
   }, []);
 
+  async function onUpload() {
+    setUploadError("");
+
+    if (!uploadFile) {
+      setUploadError("pick a file first");
+      return;
+    }
+
+    if (uploading) {
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const form = new FormData();
+      form.append("file", uploadFile);
+
+      await apiFetch("/media/upload", {
+        method: "POST",
+        body: form,
+      });
+
+      setUploadFile(null);
+
+      // refresh gallery so the new item appears
+      await loadMedia();
+    } catch (e) {
+      setUploadError(e.message || "upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
+
   return (
     <div>
       <h1 style={{ textAlign: "center" }}>Gallery</h1>
+
+      <div style={{ display: "flex", justifyContent: "center", margin: "12px 0", gap: 12 }}>
+        <input
+          type="file"
+          accept="image/*,video/*"
+          onChange={(e) =>
+            setUploadFile(e.target.files && e.target.files[0] ? e.target.files[0] : null)
+          }
+        />
+
+        <button onClick={onUpload} disabled={uploading}>
+          {uploading ? "Uploading..." : "Upload"}
+        </button>
+      </div>
+
+      {uploadError ? (
+        <div style={{ textAlign: "center", marginBottom: 12 }}>{uploadError}</div>
+      ) : null}
 
       {error ? <div>{error}</div> : null}
 
