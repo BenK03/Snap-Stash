@@ -142,6 +142,10 @@ function Gallery() {
         <div style={{ textAlign: "center", marginBottom: 12 }}>{uploadError}</div>
       ) : null}
 
+      {deleteError ? (
+        <div style={{ textAlign: "center", marginBottom: 12 }}>{deleteError}</div>
+      ) : null}
+
       {error ? <div>{error}</div> : null}
 
       <div style={{ display: "flex", justifyContent: "center" }}>
@@ -175,25 +179,48 @@ function Gallery() {
 
             if (it.media_type === "video") {
               return (
-                <video
+                <div
                   key={it.media_id}
-                  src={url}
-                  muted
-                  playsInline
-                  preload="metadata"
-                  onClick={() => setSelected({
-                    media_id: it.media_id,
-                    media_type: it.media_type,
-                    url,
-                  })}
-                  style={{
-                    width: 120,
-                    height: 120,
-                    objectFit: "cover",
-                    border: "2px solid black",
-                    cursor: "pointer",
-                  }}
-                />
+                  style={{ position: "relative", width: 120, height: 120 }}
+                >
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(it.media_id);
+                    }}
+                    disabled={deletingId === it.media_id}
+                    style={{
+                      position: "absolute",
+                      top: 6,
+                      right: 6,
+                      zIndex: 2,
+                      cursor: "pointer",
+                    }}
+                  >
+                    X
+                  </button>
+
+                  <video
+                    src={url}
+                    muted
+                    playsInline
+                    preload="metadata"
+                    onClick={() =>
+                      setSelected({
+                        media_id: it.media_id,
+                        media_type: it.media_type,
+                        url,
+                      })
+                    }
+                    style={{
+                      width: 120,
+                      height: 120,
+                      objectFit: "cover",
+                      border: "2px solid black",
+                      cursor: "pointer",
+                    }}
+                  />
+                </div>
               );
             }
 
