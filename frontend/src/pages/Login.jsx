@@ -35,7 +35,7 @@ function Login() {
       }
 
       localStorage.setItem("user_id", String(data.user_id));
-      navigate("/");
+      navigate("/gallery", { replace: true });
     } catch (e2) {
       setError(e2.message || "login failed");
     } finally {
