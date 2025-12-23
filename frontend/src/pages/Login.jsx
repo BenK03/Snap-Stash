@@ -44,7 +44,16 @@ function Login() {
   }
 
   return (
-    <div style={{ maxWidth: 360, margin: "0 auto" }}>
+    <div
+    style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: "-100px",
+    }}
+    >
+    <div style={{ width: 360 }}>
       <h1 style={{ textAlign: "center" }}>Login</h1>
 
       {error ? <div style={{ marginBottom: 12 }}>{error}</div> : null}
@@ -55,7 +64,7 @@ function Login() {
           <input
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="demo999"
+            placeholder="username"
           />
         </label>
 
@@ -65,7 +74,7 @@ function Login() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="demo999"
+            placeholder="password"
           />
         </label>
 
@@ -77,6 +86,7 @@ function Login() {
       <div style={{ marginTop: 12, textAlign: "center" }}>
         Need an account? <Link to="/register">Register</Link>
       </div>
+    </div>
     </div>
   );
 }

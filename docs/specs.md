@@ -13,7 +13,7 @@ These requirements define the behaviours and features of the application.
 - Allow users to delete their uploaded photos and videos.
 
 ### 1.4. Timeline Sorting
-- Organize and display media by date, functioning similarly to Snapchat memories.
+- Organize and display media by most recent to least.
 
 ### 1.5. Caching 
 - Utilize Redis to cache frequently accessed data for faster retrieval.

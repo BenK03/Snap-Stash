@@ -128,7 +128,9 @@ function Gallery() {
 
   return (
     <div>
-      <h1 style={{ textAlign: "center" }}>Gallery</h1>
+      <h1 style={{ textAlign: "center", fontFamily: "Courier New, monospace" }}>
+        Gallery
+      </h1>
 
       <div style={{ display: "flex", justifyContent: "center", margin: "12px 0", gap: 12 }}>
         <input

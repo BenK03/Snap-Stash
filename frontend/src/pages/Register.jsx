@@ -63,7 +63,16 @@ function Register() {
   }
 
   return (
-    <div style={{ maxWidth: 360, margin: "0 auto" }}>
+    <div
+    style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: "-100px",
+    }}
+    >
+    <div style={{ width: 360 }}>
       <h1 style={{ textAlign: "center" }}>Register</h1>
 
       {error ? <div style={{ marginBottom: 12 }}>{error}</div> : null}
@@ -74,7 +83,7 @@ function Register() {
           <input
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="demo"
+            placeholder="username"
           />
         </label>
 
@@ -96,6 +105,7 @@ function Register() {
       <div style={{ marginTop: 12, textAlign: "center" }}>
         Already have an account? <Link to="/login">Login</Link>
       </div>
+    </div>
     </div>
   );
 }
