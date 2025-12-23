@@ -42,13 +42,14 @@ function Gallery() {
 
       {error ? <div>{error}</div> : null}
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: 12,
-        }}
-      >
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 120px)",
+            gap: 12,
+          }}
+        >
         {items.map((it) => {
           const url = thumbUrls[it.media_id];
 
@@ -57,8 +58,9 @@ function Gallery() {
               <div
                 key={it.media_id}
                 style={{
-                  border: "1px solid #ddd",
-                  height: 180,
+                  border: "2px solid black",
+                  height: 120,
+                  width: 120,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -76,10 +78,10 @@ function Gallery() {
                 src={url}
                 controls
                 style={{
-                  width: "100%",
-                  height: 180,
+                  width: 120,
+                  height: 120,
                   objectFit: "cover",
-                  border: "1px solid #ddd",
+                  border: "2px solid black",
                 }}
               />
             );
@@ -91,14 +93,15 @@ function Gallery() {
               src={url}
               alt=""
               style={{
-                width: "100%",
-                height: 180,
+                width: 120,
+                height: 120,
                 objectFit: "cover",
-                border: "1px solid #ddd",
+                border: "2px solid black",
               }}
             />
           );
         })}
+        </div>
       </div>
     </div>
   );
