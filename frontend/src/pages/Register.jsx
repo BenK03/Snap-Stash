@@ -33,15 +33,27 @@ function Register() {
         throw new Error(msg || "register failed");
       }
 
-      const data = await res.json();
-      console.log("REGISTER RESPONSE:", data);
+      await res.json(); // register returns {status:"ok"}, not user_id
 
-      const userId = data.user_id || data.userID || data.id;
-      if (!userId) {
-        throw new Error("register succeeded but no user_id returned");
+      // login immediately to get user_id
+      const loginRes = await apiFetch("/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (!loginRes.ok) {
+        const msg = await loginRes.text();
+        throw new Error(msg || "login after register failed");
       }
 
-      localStorage.setItem("user_id", String(userId));
+      const loginData = await loginRes.json();
+
+      if (!loginData.user_id) {
+        throw new Error("login succeeded but no user_id returned");
+      }
+
+      localStorage.setItem("user_id", String(loginData.user_id));
       navigate("/");
     } catch (e2) {
       setError(e2.message || "register failed");
