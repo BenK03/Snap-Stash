@@ -7,33 +7,39 @@ function Gallery() {
   const [error, setError] = useState("");
   const [thumbUrls, setThumbUrls] = useState({});
   const [selected, setSelected] = useState(null);
+  const [uploadFile, setUploadFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const [deletingId, setDeletingId] = useState(null);
+  const [deleteError, setDeleteError] = useState("");
+
+  // Helper to load media and set state
+  async function loadMedia() {
+    setError("");
+
+    try {
+      const res = await apiFetch("/media");
+      const data = await res.json();
+
+      const list = data.items || [];
+      setItems(list);
+
+      const urls = {};
+
+      for (const it of list) {
+        const fileRes = await apiFetch(`/media/${it.media_id}/file`);
+        const blob = await fileRes.blob();
+        const url = URL.createObjectURL(blob);
+        urls[it.media_id] = url;
+      }
+
+      setThumbUrls(urls);
+    } catch (e) {
+      setError(e.message || "failed to load media");
+    }
+  }
 
   useEffect(() => {
-    async function loadMedia() {
-      setError("");
-
-      try {
-        const res = await apiFetch("/media");
-        const data = await res.json();
-
-        const list = data.items || [];
-        setItems(list);
-
-        const urls = {};
-
-        for (const it of list) {
-          const fileRes = await apiFetch(`/media/${it.media_id}/file`);
-          const blob = await fileRes.blob();
-          const url = URL.createObjectURL(blob);
-          urls[it.media_id] = url;
-        }
-
-        setThumbUrls(urls);
-      } catch (e) {
-        setError(e.message || "failed to load media");
-      }
-    }
-
     loadMedia();
 
     function onKeyDown(e) {
@@ -49,9 +55,96 @@ function Gallery() {
     };
   }, []);
 
+  async function onUpload() {
+    setUploadError("");
+
+    if (!uploadFile) {
+      setUploadError("pick a file first");
+      return;
+    }
+
+    if (uploading) {
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const form = new FormData();
+      form.append("file", uploadFile);
+
+      await apiFetch("/media/upload", {
+        method: "POST",
+        body: form,
+      });
+
+      setUploadFile(null);
+
+      // refresh gallery so the new item appears
+      await loadMedia();
+    } catch (e) {
+      setUploadError(e.message || "upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function onDelete(mediaId) {
+    setDeleteError("");
+
+    if (deletingId) {
+      return;
+    }
+
+    const ok = window.confirm("Delete this media?");
+    if (!ok) {
+      return;
+    }
+
+    setDeletingId(mediaId);
+
+    try {
+      await apiFetch(`/media/${mediaId}`, {
+        method: "DELETE",
+      });
+
+      if (selected && selected.media_id === mediaId) {
+        setSelected(null);
+      }
+
+      await loadMedia();
+    } catch (e) {
+      setDeleteError(e.message || "delete failed");
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   return (
     <div>
       <h1 style={{ textAlign: "center" }}>Gallery</h1>
+
+      <div style={{ display: "flex", justifyContent: "center", margin: "12px 0", gap: 12 }}>
+        <input
+          type="file"
+          accept="image/*,video/*"
+          onChange={(e) =>
+            setUploadFile(e.target.files && e.target.files[0] ? e.target.files[0] : null)
+          }
+        />
+
+        <button onClick={onUpload} disabled={uploading}>
+          {uploading ? "Uploading..." : "Upload"}
+        </button>
+      </div>
+
+      {uploadError ? (
+        <div style={{ textAlign: "center", marginBottom: 12 }}>{uploadError}</div>
+      ) : null}
+
+      {deleteError ? (
+        <div style={{ textAlign: "center", marginBottom: 12 }}>{deleteError}</div>
+      ) : null}
 
       {error ? <div>{error}</div> : null}
 
@@ -86,46 +179,90 @@ function Gallery() {
 
             if (it.media_type === "video") {
               return (
-                <video
+                <div
                   key={it.media_id}
+                  style={{ position: "relative", width: 120, height: 120 }}
+                >
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(it.media_id);
+                    }}
+                    disabled={deletingId === it.media_id}
+                    style={{
+                      position: "absolute",
+                      top: 6,
+                      right: 6,
+                      zIndex: 2,
+                      cursor: "pointer",
+                    }}
+                  >
+                    X
+                  </button>
+
+                  <video
+                    src={url}
+                    muted
+                    playsInline
+                    preload="metadata"
+                    onClick={() =>
+                      setSelected({
+                        media_id: it.media_id,
+                        media_type: it.media_type,
+                        url,
+                      })
+                    }
+                    style={{
+                      width: 120,
+                      height: 120,
+                      objectFit: "cover",
+                      border: "2px solid black",
+                      cursor: "pointer",
+                    }}
+                  />
+                </div>
+              );
+            }
+
+            return (
+              <div key={it.media_id} style={{ position: "relative", width: 120, height: 120 }}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(it.media_id);
+                  }}
+                  disabled={deletingId === it.media_id}
+                  style={{
+                    position: "absolute",
+                    top: 6,
+                    right: 6,
+                    zIndex: 2,
+                    cursor: "pointer",
+                  }}
+                >
+                  X
+                </button>
+
+                <img
                   src={url}
-                  muted
-                  playsInline
-                  preload="metadata"
-                  onClick={() => setSelected({
-                    media_id: it.media_id,
-                    media_type: it.media_type,
-                    url,
-                  })}
+                  alt=""
+                  onClick={() =>
+                    setSelected({
+                      media_id: it.media_id,
+                      media_type: it.media_type,
+                      url,
+                    })
+                  }
                   style={{
                     width: 120,
                     height: 120,
                     objectFit: "cover",
                     border: "2px solid black",
                     cursor: "pointer",
+                    display: "block",
                   }}
                 />
-              );
-            }
-
-            return (
-              <img
-                key={it.media_id}
-                src={url}
-                alt=""
-                onClick={() => setSelected({
-                  media_id: it.media_id,
-                  media_type: it.media_type,
-                  url,
-                })}
-                style={{
-                  width: 120,
-                  height: 120,
-                  objectFit: "cover",
-                  border: "2px solid black",
-                  cursor: "pointer",
-                }}
-              />
+              </div>
             );
           })}
         </div>
