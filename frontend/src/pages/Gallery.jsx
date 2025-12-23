@@ -10,6 +10,8 @@ function Gallery() {
   const [uploadFile, setUploadFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
+  const [deletingId, setDeletingId] = useState(null);
+  const [deleteError, setDeleteError] = useState("");
 
   // Helper to load media and set state
   async function loadMedia() {
@@ -84,6 +86,37 @@ function Gallery() {
       setUploadError(e.message || "upload failed");
     } finally {
       setUploading(false);
+    }
+  }
+
+  async function onDelete(mediaId) {
+    setDeleteError("");
+
+    if (deletingId) {
+      return;
+    }
+
+    const ok = window.confirm("Delete this media?");
+    if (!ok) {
+      return;
+    }
+
+    setDeletingId(mediaId);
+
+    try {
+      await apiFetch(`/media/${mediaId}`, {
+        method: "DELETE",
+      });
+
+      if (selected && selected.media_id === mediaId) {
+        setSelected(null);
+      }
+
+      await loadMedia();
+    } catch (e) {
+      setDeleteError(e.message || "delete failed");
+    } finally {
+      setDeletingId(null);
     }
   }
 
