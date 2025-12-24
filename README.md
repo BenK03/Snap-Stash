@@ -70,7 +70,7 @@ To wipe all data
 ```bash
 docker compose down -v
 ```
-<br>
+<br/>
 ### 📸 Preview
 ---
 <p align="center">
