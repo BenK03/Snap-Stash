@@ -1,7 +1,9 @@
 ### 🧑🏻‍💻 Snap Stash
+---
 Snap-Stash is a backend-focused media storage system built with Go, React, MySQL, Redis, and a S3-compatible object storage.
 
 ### 🧑‍🔧 Architecture Overview
+---
 * React frontend (Vite) communicates with Go REST API
 * Go backend handles auth, media upload, retrieval, and deletion
 * MySQL stores media metadata
@@ -9,6 +11,7 @@ Snap-Stash is a backend-focused media storage system built with Go, React, MySQL
 * Redis caches recently accessed media
 
 ### ⭐️ Features
+---
 * 💨 Caching: Uses Redis to cache recently viewed media for rapid retrieval
 * 📲 Upload: Allows user to upload media
 * 🗑️ Delete: Allows user to delete media
@@ -19,11 +22,13 @@ Snap-Stash is a backend-focused media storage system built with Go, React, MySQL
 * 🧰 Auto Setup: Infrastructure and storage buckets are initialized automatically at startup
 
 ### 📝 Requirements
+---
 * Docker (Docker Engine + Docker Compose)
 * Go 1.21+
 * Node.js 18+
 
 ### 💻 Demo Instructions
+---
 ## Local Setup
 ```bash
 git clone <REPO_URL>
@@ -46,6 +51,7 @@ npm run dev
 ```
 
 ### Demo Walkthrough
+---
 1. Open the link in the frontend terminal
 2. Create an account
 3. Upload a photo or a video
@@ -54,6 +60,7 @@ npm run dev
 6. Delete media by clicking the X on the top right of the photo/video
 
 ### Stopping the Demo
+---
 Stop the backend & frontend with control + C in their terminals.
 
 ```bash
