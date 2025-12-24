@@ -29,7 +29,7 @@ Snap-Stash is a backend-focused media storage system built with Go, React, MySQL
 
 ### 💻 Demo Instructions
 ---
-## Local Setup
+#### Local Setup
 ```bash
 git clone <REPO_URL>
 cd Snap-Stash
