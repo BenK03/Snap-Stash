@@ -69,4 +69,11 @@ docker compose down
 To wipe all data
 ```bash
 docker compose down -v
+```
+
+### 📸 Preview
+<p align="center">
+  <img width="578" height="974" alt="Snap Stash Demo" src="https://github.com/user-attachments/assets/17c5c46a-6bc6-4218-8100-b1afedd6ca17" />
+</p>p>
+
 
